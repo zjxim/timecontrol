@@ -342,3 +342,33 @@ body{
 .history-date-input::-webkit-datetime-edit-month-field,
 .history-date-input::-webkit-datetime-edit-day-field,
 .history-date-input::-webkit-datetime-edit-year-field{color:var(--text)}
+
+
+/* ===== Switch Dialog ===== */
+.switch-info{
+  text-align:center;font-size:15px;font-weight:500;padding:4px 0 8px;color:var(--text)
+}
+.switch-info .from-state{color:var(--text2);font-weight:400}
+.switch-info .to-state{font-weight:600}
+.review-section{
+  margin:6px 0;padding:8px;background:rgba(74,144,217,0.08);border-radius:var(--radius-sm);
+  border:1px solid rgba(74,144,217,0.2)
+}
+.review-section.hidden{display:none}
+.review-label{font-size:11px;color:var(--state-study);margin-bottom:4px;font-weight:500}
+.review-input{
+  width:100%;padding:8px 10px;border-radius:6px;background:var(--card-bg2);
+  border:1px solid var(--border);color:var(--text);font-size:13px;outline:none;
+  resize:vertical;min-height:50px;font-family:inherit;line-height:1.4
+}
+.review-input:focus{border-color:var(--state-study)}
+.review-input::placeholder{color:var(--text3)}
+.note-field{margin:6px 0}
+
+/* ===== Review in History ===== */
+.history-review{
+  margin:4px 0 4px 20px;padding:6px 10px;background:rgba(74,144,217,0.06);
+  border-left:2px solid var(--state-study);border-radius:0 4px 4px 0;
+  font-size:11px;color:var(--text2);line-height:1.4
+}
+.history-review .review-label{font-size:10px;color:var(--state-study);margin-bottom:2px}

@@ -462,7 +462,7 @@ function stopTimer(){
   if(timerInterval){ clearInterval(timerInterval); timerInterval = null; }
 }
 // ===== SWITCH STATE =====
-async function switchToState(stateId, note){
+async function switchToState(stateId, note, review){
   const nowT = now();
   const today = getTodayStr();
   const current = findCurrentRecord();
@@ -481,6 +481,7 @@ async function switchToState(stateId, note){
     endTime: null,
     date: today,
     note: note || null,
+    review: review || null,
     triggerType: "manual"
   };
   records.unshift(newRec);
@@ -504,20 +505,33 @@ async function switchToState(stateId, note){
 }
 
 // ===== FRICTION HANDLING =====
-function showFrictionConfirm(stateId){
+function showSwitchDialog(stateId){
   const modal = document.getElementById("switch-modal");
   const title = document.getElementById("modal-title");
-  const body = document.getElementById("modal-body");
+  const switchInfo = document.getElementById("switch-info");
+  const reviewSection = document.getElementById("review-section");
+  const reviewInput = document.getElementById("review-input");
+  const noteInput = document.getElementById("switch-note");
+  const current = findCurrentRecord();
   const state = STATE_MAP[stateId];
   if(!state) return;
-  const current = findCurrentRecord();
   const curState = current ? STATE_MAP[current.state] : null;
-  title.textContent = "⚠️ 确定切换到 "+state.name+"？";
-  if(curState){
-    body.innerHTML = "当前：<strong>"+curState.name+"</strong> → 目标：<strong>"+state.name+"</strong><br><br>确定要把正事丢下去娱乐吗？";
-  }else{
-    body.textContent = "确定切换到"+state.name+"？";
+
+  title.textContent = curState ? "从 "+curState.name+" 切换到 "+state.name+"？" : "切换到 "+state.name;
+  if(switchInfo){
+      const fromName = curState ? curState.name : '无'
+    const color = getComputedStyle(document.documentElement).getPropertyValue(state.color).trim() || "#fff";
+      switchInfo.innerHTML = '<span class="from-state">'+fromName+'</span> → <span class="to-state" style="color:'+getComputedStyle(document.documentElement).getPropertyValue(state.color).trim() || "#fff"+'">'+state.name+'</span>'
   }
+  if(reviewSection && reviewInput){
+    if(current && current.state === "study"){
+      reviewSection.classList.remove("hidden");
+      reviewInput.value = "";
+    } else {
+      reviewSection.classList.add("hidden");
+    }
+  }
+  if(noteInput) noteInput.value = "";
   modal.dataset.targetState = stateId;
   modal.classList.remove("hidden");
 }
@@ -525,14 +539,7 @@ function showFrictionConfirm(stateId){
 function handleStateClick(stateId){
   const current = findCurrentRecord();
   if(current && current.state === stateId) return;
-  if(current && needsFriction(current.state, stateId)){
-    if(settings.friction === "confirm" || settings.friction === "both"){
-      showFrictionConfirm(stateId);
-      return;
-    }
-    return; // longpress mode ignored on click
-  }
-  showNoteModal(stateId);
+  showSwitchDialog(stateId);
 }
 
 function setupLongPress(btn, stateId){
@@ -557,7 +564,7 @@ function setupLongPress(btn, stateId){
         btn.classList.remove("pressing");
         pressingState = null;
         triggered = true;
-        if(settings.friction === "longpress"){
+        if(settings.friction === "longpress" || settings.friction === "both"){
           showFrictionConfirm(stateId);
         }
       }
@@ -580,12 +587,7 @@ function setupLongPress(btn, stateId){
 
 // ===== NOTE MODAL =====
 function showNoteModal(stateId){
-  const modal = document.getElementById("note-modal");
-  const input = document.getElementById("note-input");
-  if(input) input.value = "";
-  modal.dataset.targetState = stateId;
-  modal.classList.remove("hidden");
-  if(input) setTimeout(()=>input.focus(), 300);
+  showSwitchDialog(stateId);
 }
 
 // ===== STATE GRID =====
@@ -676,6 +678,7 @@ async function renderHistory(){
     html += "<div style=\"font-size:11px;color:var(--text2)\">"+sStr+" → "+eStr+"</div>";
     html += "<div style=\"font-size:13px;font-weight:500\">"+(state?state.emoji+" "+state.name:"未知")+" <span style=\"font-size:11px;color:var(--text2);font-weight:400\">"+formatDurationShort(d)+"</span></div>";
     if(r.note) html += "<div style=\"font-size:11px;color:var(--text2);margin-top:2px\">📝 "+r.note+"</div>";
+    if(r.review && r.state === "study") html += "<div class=\"history-review\"><div class=\"review-label\">📖 学习回顾</div>"+r.review+"</div>";
     html += "</div>";
   }
   html += "</div>";
@@ -766,8 +769,10 @@ async function init(){
   document.getElementById("modal-confirm")?.addEventListener("click", ()=>{
     const m = document.getElementById("switch-modal");
     const sid = m.dataset.targetState;
+    const note = document.getElementById("switch-note")?.value.trim() || "";
+    const review = document.getElementById("review-input")?.value.trim() || "";
     m.classList.add("hidden");
-    if(sid) showNoteModal(sid);
+    if(sid) switchToState(sid, note, review);
   });
   document.getElementById("modal-cancel")?.addEventListener("click", ()=>document.getElementById("switch-modal").classList.add("hidden"));
   document.querySelectorAll("#switch-modal .modal-overlay").forEach(el=>el.addEventListener("click",()=>document.getElementById("switch-modal").classList.add("hidden")));
@@ -775,15 +780,11 @@ async function init(){
   document.getElementById("note-confirm")?.addEventListener("click", ()=>{
     const m = document.getElementById("note-modal");
     const sid = m.dataset.targetState;
-    const note = document.getElementById("note-input")?.value.trim() || "";
     m.classList.add("hidden");
-    if(sid) switchToState(sid, note);
+    if(sid) showSwitchDialog(sid);
   });
   document.getElementById("note-cancel")?.addEventListener("click", ()=>{
-    const m = document.getElementById("note-modal");
-    const sid = m.dataset.targetState;
-    m.classList.add("hidden");
-    if(sid) switchToState(sid, null);
+    document.getElementById("note-modal").classList.add("hidden");
   });
   document.querySelectorAll("#note-modal .modal-overlay").forEach(el=>el.addEventListener("click",()=>document.getElementById("note-modal").classList.add("hidden")));
 
@@ -815,7 +816,7 @@ async function init(){
       if(cur && (cur.state==="study"||cur.state==="work")){
         startMicroMode();
       }else{
-        showNoteModal("study");
+        showSwitchDialog("study");
       }
     });
     section.appendChild(microBtn);

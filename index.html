@@ -193,7 +193,18 @@
     <div class="modal-overlay"></div>
     <div class="modal-content">
       <div class="modal-title" id="modal-title">切换状态</div>
-      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-body" id="modal-body">
+        <div class="switch-info" id="switch-info">
+          <span id="modal-from-state"></span> → <span id="modal-to-state"></span>
+        </div>
+        <div id="review-section" class="review-section hidden">
+          <div class="review-label">📝 回顾刚才学了什么</div>
+          <textarea id="review-input" class="review-input" rows="3" placeholder="写下所学内容，帮助巩固记忆..." maxlength="500"></textarea>
+        </div>
+        <div class="note-field">
+          <input type="text" id="switch-note" class="note-input" placeholder="备注（可选）" maxlength="50">
+        </div>
+      </div>
       <div class="modal-actions">
         <button class="modal-btn modal-cancel" id="modal-cancel">取消</button>
         <button class="modal-btn modal-confirm" id="modal-confirm">确定切换</button>
@@ -201,8 +212,7 @@
     </div>
   </div>
 
-  <!-- ====== 微启动模态框 ====== -->
-  <div id="micro-modal" class="modal hidden">
+  <!-- ====== 微启动模态框 ====== -->id="micro-modal" class="modal hidden">
     <div class="modal-overlay"></div>
     <div class="modal-content">
       <div class="modal-title">微启动</div>

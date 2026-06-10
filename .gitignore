@@ -26,3 +26,4 @@ Desktop.ini
 node_modules/
 .pnp
 .pnp.js
+_check*

@@ -827,5 +827,88 @@ async function init(){
   console.log("时间觉察 App initialized");
 }
 
+
+// ===== CALENDAR =====
+let calendarMonth = new Date().getMonth();
+let calendarYear = new Date().getFullYear();
+
+async function getAllDatesWithRecords(){
+  const all = await getAllRecords();
+  const dates = new Set();
+  all.forEach(r => { if(r.date) dates.add(r.date); });
+  return dates;
+}
+
+function renderCalendar(year, month){
+  const container = document.getElementById("calendar-container");
+  if(!container) return;
+  
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  
+  // Header
+  let html = "<div class=\"cal-month-nav\">";
+  html += "<button class=\"cal-month-btn\" data-cal-nav=\"-1\">◀</button>";
+  html += "<span class=\"cal-month-title\">" + year + "年" + (month+1) + "月</span>";
+  html += "<button class=\"cal-month-btn\" data-cal-nav=\"1\">▶</button>";
+  html += "</div>";
+  
+  // Weekday headers
+  html += "<div class=\"cal-weekdays\">";
+  ["一","二","三","四","五","六","日"].forEach(function(d){
+    html += "<span class=\"cal-weekday\">" + d + "</span>";
+  });
+  html += "</div>";
+  
+  // Day grid
+  html += "<div class=\"cal-days\" id=\"cal-days-grid\">";
+  
+  // Empty cells before first day
+  let startDay = firstDay.getDay();
+  let emptyCount = startDay === 0 ? 6 : startDay - 1;
+  for(let i = 0; i < emptyCount; i++){
+    html += "<span class=\"cal-day empty\"></span>";
+  }
+  
+  // Previous month days (for context)
+  const prevMonthLast = new Date(year, month, 0).getDate();
+  for(let i = emptyCount - 1; i >= 0 && emptyCount > 0; i--){
+    const d = prevMonthLast - i;
+    html += "<span class=\"cal-day other-month\" data-date=\"\">" + d + "</span>";
+  }
+  
+  // Current month days
+  const today = getTodayStr();
+  const selectedStr = formatDate(historyDate);
+  const promises = getAllDatesWithRecords();
+  // We'll handle async differently - just render without record indicators for now
+  // and update them after
+  for(let d = 1; d <= lastDay.getDate(); d++){
+    const dateStr = formatDateStr(year, month, d);
+    const isToday = dateStr === today;
+    const isSelected = dateStr === selectedStr;
+    let cls = "cal-day";
+    if(isToday) cls += " today";
+    if(isSelected) cls += " selected";
+    html += "<span class=\"" + cls + "\" data-date=\"" + dateStr + "\">" + d + "</span>";
+  }
+  
+  html += "</div>";
+  container.innerHTML = html;
+  
+  // Async: mark days with records
+  getAllDatesWithRecords().then(function(datesWithRecords){
+    document.querySelectorAll("#cal-days-grid .cal-day[data-date]").forEach(function(el){
+      if(datesWithRecords.has(el.dataset.date)){
+        el.classList.add("has-record");
+      }
+    });
+  });
+}
+
+function formatDateStr(year, month, day){
+  return year + "-" + String(month+1).padStart(2,"0") + "-" + String(day).padStart(2,"0");
+}
+
 document.addEventListener("DOMContentLoaded", init);
 })();

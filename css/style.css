@@ -280,3 +280,65 @@ body{
   .state-btn{padding:10px 4px}
   .summary-value{font-size:14px}
 }
+
+/* ===== Calendar ===== */
+.calendar-toggle{
+  display:flex;align-items:center;justify-content:center;gap:4px;
+  background:var(--card-bg2);border:1px solid var(--border);border-radius:var(--radius-sm);
+  color:var(--text2);padding:6px 12px;font-size:11px;cursor:pointer;margin:0 0 8px;
+  width:fit-content;align-self:center;transition:all 0.2s
+}
+.calendar-toggle:active{background:var(--card-bg)}
+.calendar-toggle.active{border-color:var(--state-study);color:var(--state-study)}
+.calendar-container{
+  background:var(--card-bg);border-radius:var(--radius-sm);padding:10px;margin-bottom:10px;
+  border:1px solid var(--border);overflow:hidden;transition:max-height 0.3s
+}
+.calendar-container.hidden{display:none}
+.cal-month-nav{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:8px
+}
+.cal-month-title{font-size:14px;font-weight:600}
+.cal-month-btn{
+  background:var(--card-bg2);border:none;color:var(--text);
+  width:30px;height:30px;border-radius:15px;font-size:14px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center
+}
+.cal-month-btn:active{background:var(--surface)}
+.cal-weekdays{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px
+}
+.cal-weekday{text-align:center;font-size:10px;color:var(--text3);padding:2px 0}
+.cal-days{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:2px
+}
+.cal-day{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  aspect-ratio:1;border-radius:6px;font-size:12px;cursor:pointer;
+  background:var(--card-bg2);color:var(--text);position:relative;transition:all 0.15s
+}
+.cal-day:active{transform:scale(0.9)}
+.cal-day.other-month{color:var(--text3)}
+.cal-day.today{border:1px solid var(--state-study);font-weight:600}
+.cal-day.selected{background:var(--state-study);color:#fff;font-weight:600}
+.cal-day.has-record::after{
+  content:"";position:absolute;bottom:2px;width:4px;height:4px;
+  border-radius:2px;background:var(--state-study)
+}
+.cal-day.selected.has-record::after{background:#fff}
+.cal-day.empty{visibility:hidden}
+
+/* ===== Date Input ===== */
+.history-date-input{
+  background:var(--card-bg2);border:1px solid var(--border);border-radius:6px;
+  color:var(--text);font-size:14px;font-weight:600;padding:6px 10px;
+  text-align:center;width:150px;cursor:pointer;
+  -webkit-appearance:none;appearance:none;position:relative
+}
+.history-date-input::-webkit-calendar-picker-indicator{
+  filter:invert(1);cursor:pointer;opacity:0.6
+}
+.history-date-input::-webkit-datetime-edit-text{color:var(--text2)}
+.history-date-input::-webkit-datetime-edit-month-field,
+.history-date-input::-webkit-datetime-edit-day-field,
+.history-date-input::-webkit-datetime-edit-year-field{color:var(--text)}

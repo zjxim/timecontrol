@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1A1A2E">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27%3E%3Crect width=%27512%27 height=%27512%27 rx=%2780%27 fill=%27%231A1A2E%27/%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%27180%27 fill=%27none%27 stroke=%27%234A90D9%27 stroke-width=%2724%27/%3E%3Cline x1=%27256%27 y1=%27256%27 x2=%27256%27 y2=%27140%27 stroke=%27%23FFFFFF%27 stroke-width=%2716%27 stroke-linecap=%27round%27/%3E%3Cline x1=%27256%27 y1=%27256%27 x2=%27340%27 y2=%27280%27 stroke=%27%23FFFFFF%27 stroke-width=%2712%27 stroke-linecap=%27round%27/%3E%3Ccircle cx=%27256%27 cy=%27256%27 r=%2716%27 fill=%27%234A90D9%27/%3E%3C/svg%3E">
+<title>时间觉察</title>
+<link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ====== 今日视图 ====== -->
+  <div id="view-today" class="view active">
+    <!-- 状态栏占位 -->
+    <div class="status-bar"></div>
+
+    <!-- 当前状态展示 -->
+    <div class="current-state-section">
+      <div class="state-label">当前状态</div>
+      <div id="current-state-card" class="state-card" data-state="">
+        <div class="state-emoji" id="current-emoji"></div>
+        <div class="state-name" id="current-name">未开始</div>
+        <div class="state-duration" id="current-duration">--:--:--</div>
+      </div>
+      <div class="state-since" id="current-since"></div>
+    </div>
+
+    <!-- 惰性对抗提示 -->
+    <div id="laziness-banner" class="laziness-banner hidden">
+      <div class="laziness-icon">⚠️</div>
+      <div class="laziness-text" id="laziness-text"></div>
+    </div>
+
+    <!-- 状态切换按钮组 -->
+    <div class="state-buttons-section">
+      <div class="section-title">切换状态</div>
+      <div class="state-grid" id="state-grid"></div>
+    </div>
+
+    <!-- 今日概览 -->
+    <div class="daily-summary-section">
+      <div class="section-title">今日概览</div>
+      <div class="summary-cards">
+        <div class="summary-card goal-card">
+          <div class="summary-label">学习目标</div>
+          <div class="summary-value" id="goal-display">4h</div>
+        </div>
+        <div class="summary-card learned-card">
+          <div class="summary-label">已学习</div>
+          <div class="summary-value" id="learned-display">0h 0m</div>
+        </div>
+        <div class="summary-card debt-card">
+          <div class="summary-label">时间负债</div>
+          <div class="summary-value" id="debt-display">0h 0m</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 时间分布环图 -->
+    <div class="chart-section">
+      <div class="section-title">时间分布</div>
+      <div class="chart-container">
+        <svg id="donut-chart" viewBox="0 0 200 200" class="donut-svg"></svg>
+        <div class="chart-center" id="chart-center-text">今日<br><span id="chart-total-hours">0h</span></div>
+      </div>
+      <div class="chart-legend" id="chart-legend"></div>
+    </div>
+  </div>
+
+  <!-- ====== 历史视图 ====== -->
+  <div id="view-history" class="view">
+    <div class="status-bar"></div>
+    <div class="view-header">
+      <h2>历史记录</h2>
+    </div>
+    <div class="history-nav">
+      <button class="history-arrow" id="history-prev">‹</button>
+      <div class="history-date-display" id="history-date-display"></div>
+      <button class="history-arrow" id="history-next">›</button>
+    </div>
+    <div class="history-content" id="history-content">
+      <div class="empty-state">选择日期查看记录</div>
+    </div>
+  </div>
+
+  <!-- ====== 设置视图 ====== -->
+  <div id="view-settings" class="view">
+    <div class="status-bar"></div>
+    <div class="view-header">
+      <h2>设置</h2>
+    </div>
+    <div class="settings-list">
+
+      <!-- 学习目标 -->
+      <div class="setting-group">
+        <div class="setting-label">每日学习目标</div>
+        <div class="setting-control">
+          <button class="setting-btn" data-goal-adjust="-30">−30m</button>
+          <span class="setting-value" id="setting-goal-display">4h 0m</span>
+          <button class="setting-btn" data-goal-adjust="30">+30m</button>
+        </div>
+      </div>
+
+      <!-- 提醒间隔 -->
+      <div class="setting-group">
+        <div class="setting-label">提醒间隔</div>
+        <div class="setting-control">
+          <button class="setting-btn" data-reminder-adjust="-10">−10m</button>
+          <span class="setting-value" id="setting-reminder-display">30m</span>
+          <button class="setting-btn" data-reminder-adjust="10">+10m</button>
+        </div>
+      </div>
+
+      <!-- 摩擦力设置 -->
+      <div class="setting-group">
+        <div class="setting-label">切换摩擦力</div>
+        <div class="setting-desc">学习/工作 → 娱乐</div>
+        <div class="setting-control">
+          <button class="setting-btn friction-option" data-friction="none">无</button>
+          <button class="setting-btn friction-option" data-friction="confirm">确认</button>
+          <button class="setting-btn friction-option selected" data-friction="longpress">长按3秒</button>
+          <button class="setting-btn friction-option" data-friction="both">长按+确认</button>
+        </div>
+      </div>
+
+      <!-- 惯性检测 -->
+      <div class="setting-group setting-toggle">
+        <div class="setting-label">切换时显示惯性数据</div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-inertia" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- 提醒通知 -->
+      <div class="setting-group setting-toggle">
+        <div class="setting-label">定时提醒通知</div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-notification" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- 惰性检测 -->
+      <div class="setting-group setting-toggle">
+        <div class="setting-label">惰性对抗模式</div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggle-laziness" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <!-- 数据操作 -->
+      <div class="setting-group setting-actions">
+        <button class="action-btn danger-btn" id="btn-export">导出数据 (JSON)</button>
+        <button class="action-btn danger-btn" id="btn-reset">重置所有数据</button>
+      </div>
+
+      <div class="setting-footer">
+        <p>时间觉察 v1.0</p>
+        <p>数据仅存储在本地设备</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 底部导航 ====== -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="today">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">今日</span>
+    </button>
+    <button class="nav-item" data-view="history">
+      <span class="nav-icon">📅</span>
+      <span class="nav-label">历史</span>
+    </button>
+    <button class="nav-item" data-view="settings">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">设置</span>
+    </button>
+  </nav>
+
+  <!-- ====== 切换模态框 ====== -->
+  <div id="switch-modal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-title" id="modal-title">切换状态</div>
+      <div class="modal-body" id="modal-body"></div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-cancel" id="modal-cancel">取消</button>
+        <button class="modal-btn modal-confirm" id="modal-confirm">确定切换</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 微启动模态框 ====== -->
+  <div id="micro-modal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-title">微启动</div>
+      <div class="modal-body">
+        <p>只看一页书 / 只做一道题 / 只写50个字</p>
+        <p class="micro-timer" id="micro-timer">05:00</p>
+        <p class="micro-hint">5分钟后自动询问是否继续</p>
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-cancel" id="micro-cancel">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== 备注模态框 ====== -->
+  <div id="note-modal" class="modal hidden">
+    <div class="modal-overlay"></div>
+    <div class="modal-content">
+      <div class="modal-title">添加备注（可选）</div>
+      <div class="modal-body">
+        <input type="text" id="note-input" class="note-input" placeholder="如：线性代数复习" maxlength="50">
+      </div>
+      <div class="modal-actions">
+        <button class="modal-btn modal-cancel" id="note-cancel">跳过</button>
+        <button class="modal-btn modal-confirm" id="note-confirm">确定</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

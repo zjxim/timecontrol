@@ -1,5 +1,5 @@
 ﻿const CACHE_NAME = 'time-aware-v1';
-const ASSETS = ['/', '/index.html', '/css/style.css', '/js/app.js', '/manifest.json'];
+const ASSETS = ['.', 'index.html', 'css/style.css', 'js/app.js', 'manifest.json'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -27,7 +27,7 @@ self.addEventListener('message', e => {
   if (e.data.type === 'NOTIFY') {
     self.registration.showNotification('时间觉察', {
       body: e.data.body,
-      icon: '/icon-192.png',
+      icon: 'icon-192.png',
       tag: 'time-reminder',
       vibrate: [200, 100, 200],
       requireInteraction: true
@@ -37,5 +37,5 @@ self.addEventListener('message', e => {
 
 self.addEventListener('notificationclick', e => {
   e.notification.close();
-  e.waitUntil(clients.openWindow('/'));
+  e.waitUntil(clients.openWindow('.'));
 });

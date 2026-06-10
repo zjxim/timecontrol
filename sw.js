@@ -1,4 +1,4 @@
-﻿const CACHE_NAME = 'time-aware-v1';
+﻿const CACHE_NAME = 'time-aware-v2';
 const ASSETS = ['.', 'index.html', 'css/style.css', 'js/app.js', 'manifest.json'];
 
 self.addEventListener('install', e => {

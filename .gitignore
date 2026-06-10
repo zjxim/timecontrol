@@ -27,3 +27,5 @@ node_modules/
 .pnp
 .pnp.js
 _check*
+_fix*
+_debug*

@@ -506,6 +506,7 @@ async function switchToState(stateId, note, review){
 
 // ===== FRICTION HANDLING =====
 function showSwitchDialog(stateId){
+  endMicroMode(false);
   const modal = document.getElementById("switch-modal");
   const title = document.getElementById("modal-title");
   const switchInfo = document.getElementById("switch-info");
@@ -519,7 +520,7 @@ function showSwitchDialog(stateId){
 
   title.textContent = curState ? "从 "+curState.name+" 切换到 "+state.name+"？" : "切换到 "+state.name;
   if(switchInfo){
-      const fromName = curState ? curState.name : '无'
+      const fromName = curState ? curState.name : '无';
     const color = getComputedStyle(document.documentElement).getPropertyValue(state.color).trim() || "#fff";
       switchInfo.innerHTML = '<span class="from-state">'+fromName+'</span> → <span class="to-state" style="color:'+getComputedStyle(document.documentElement).getPropertyValue(state.color).trim() || "#fff"+'">'+state.name+'</span>'
   }
